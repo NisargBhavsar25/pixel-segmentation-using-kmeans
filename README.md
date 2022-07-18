@@ -1,2 +1,3 @@
-# pixel-segmentation-using-kmeans
- This repository contains code to do pixel segmentation on an image using the k-means clustering algorithm.
+# Pixel Segmentation Using k-means Clustering
+
+To get the gif for different levels of segmentation of the image ``"input-image.jpg"``, run the ``"main.py"`` file and you will get an ``"output.gif"`` file as the output inside the ``"images"`` folder.

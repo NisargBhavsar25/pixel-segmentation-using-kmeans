@@ -26,7 +26,7 @@ for k in ks:
 frames = [Image.open(f"images\segmented-images\k_{i}.jpg")
           for i in ks]
 frame_one = frames[0]
-frame_one.save("output.gif", format="GIF", append_images=frames,
+frame_one.save("images\output.gif", format="GIF", append_images=frames,
                save_all=True, duration=750, loop=0)
 
 print('''

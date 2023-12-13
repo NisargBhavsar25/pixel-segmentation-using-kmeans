@@ -8,45 +8,52 @@ class KMeans:
         self.max_iter = max_iter
 
     def fit(self, data):
+        if len(data) < self.k:
+            raise ValueError("Number of data points must be greater than k")
 
-        self.centroids = {}
+        # Initialize centroids with distinct data points
+        self.centroids = {i: data[random.randint(0, len(data) - 1)] for i in range(self.k)}
 
-        for i in range(self.k):
-            self.centroids[i] = random.choice(data)
+        for _ in range(self.max_iter):
+            self.classifications = {i: [] for i in range(self.k)}
 
-        for i in range(self.max_iter):
-            self.classifications = {}
+            # Convert centroids to a NumPy array for vectorized operations
+            centroids_array = np.array(list(self.centroids.values()))
 
-            for i in range(self.k):
-                self.classifications[i] = []
+            # Vectorized distance calculation
+            distances = np.linalg.norm(data[:, np.newaxis] - centroids_array, axis=2)
+            classifications = np.argmin(distances, axis=1)
 
-            for featureset in data:
-                distances = [np.linalg.norm(
-                    featureset-self.centroids[centroid]) for centroid in self.centroids]
-                classification = distances.index(min(distances))
-                self.classifications[classification].append(featureset)
+            for index, classification in enumerate(classifications):
+                self.classifications[classification].append(data[index])
 
-            prev_centroids = self.centroids
+            prev_centroids = dict(self.centroids)
 
+            # Recalculate centroids
             for classification in self.classifications:
-                self.centroids[classification] = np.average(
-                    self.classifications[classification], axis=0)
+                if len(self.classifications[classification]) > 0:
+                    self.centroids[classification] = np.mean(self.classifications[classification], axis=0)
 
             optimized = True
 
             for c in self.centroids:
                 original_centroid = prev_centroids[c]
                 current_centroid = self.centroids[c]
-                if np.sum((current_centroid-original_centroid)/original_centroid*100.0) > self.tol:
-                    print(np.sum((current_centroid-original_centroid) /
-                          original_centroid*100.0))
+
+                # Optimization check with a condition to avoid division by zero
+                if np.linalg.norm(current_centroid - original_centroid) > self.tol:
                     optimized = False
 
             if optimized:
                 break
 
     def predict(self, data):
-        distances = [np.linalg.norm(data-self.centroids[centroid])
-                     for centroid in self.centroids]
-        classification = self.centroids[distances.index(min(distances))]
-        return classification
+        centroids_array = np.array(list(self.centroids.values()))
+        distances = np.linalg.norm(data - centroids_array, axis=1)
+        classification = np.argmin(distances)
+        return self.centroids[classification]
+
+# Example usage
+# kmeans = KMeans(k=3, tol=0.01)
+# kmeans.fit(data)
+# prediction = kmeans.predict(new_data_point)
